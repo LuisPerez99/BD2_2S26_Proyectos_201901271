@@ -1,0 +1,12 @@
+# Entornos virtuales de Python
+.venv/
+
+# Datos que no forman parte del codigo fuente
+data/
+*.log
+
+# Archivos de sistema
+.DS_Store
+*.swp
+
+__pycache__/
