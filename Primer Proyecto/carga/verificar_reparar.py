@@ -144,6 +144,21 @@ def main() -> None:
                                 m["clase"], m["estado_reserva"], m["estado_pago"]))
     print(f"  manifiesto reconstruido ({contar('manifiesto_vuelo')} filas)")
 
+    # Reservas expiradas (TTL): se reconstruyen SOLAS las canceladas/
+    # pendientes. La tabla usa default_time_to_live; repetir es
+    # idempotente porque TRUNCATE + INSERT refresca el TTL.
+    print("\n[2.5] Reconstruyendo reservas_expiradas (TTL)...")
+    session.execute("TRUNCATE reservas_expiradas")
+    s_exp = session.prepare("INSERT INTO reservas_expiradas (reserva_id, pasajero_id, vuelo_id, asiento, fecha_reserva, estado) VALUES (?,?,?,?,?,?)")
+    n_exp = 0
+    for rid, r in sorted(reservas_csv.items()):
+        if r["estado"] not in ("cancelada", "pendiente"):
+            continue
+        insertar_simple(s_exp, (rid, int(r["pasajero_id"]), int(r["vuelo_id"]),
+                                r["asiento"], PARSE_DT(r["fecha_reserva"]), r["estado"]))
+        n_exp += 1
+    print(f"  reservas_expiradas reconstruida ({n_exp} filas, TTL 90 días)")
+
     print("\n[3] Reconstruyendo agregados...")
 
     # Q1: conteo_asientos_por_vuelo_clase (tabla COUNTER)
@@ -198,8 +213,9 @@ def main() -> None:
     print(f"  Q5 reconstruido ({len(ingresos)} filas)")
 
     print("\n[4] Conteos finales...")
-    for tabla in ("reservas", "pagos_por_reserva", "historial_pasajero",
-                  "manifiesto_vuelo", "conteo_asientos_por_vuelo_clase",
+    for tabla in ("reservas", "pagos_por_reserva", "reservas_expiradas",
+                  "historial_pasajero", "manifiesto_vuelo",
+                  "conteo_asientos_por_vuelo_clase",
                   "ocupacion_por_ruta_mes", "ingresos_vuelos_por_mes"):
         print(f"  {tabla:32s} {contar(tabla):>9,}")
 

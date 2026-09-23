@@ -219,3 +219,27 @@ CREATE TABLE IF NOT EXISTS aerolinea_db.ingresos_vuelos_por_mes (
     codigo_vuelo   text,
     PRIMARY KEY (mes, ingreso_total, vuelo_id)
 ) WITH CLUSTERING ORDER BY (ingreso_total DESC, vuelo_id ASC);
+
+-- ---------------------------------------------------------------------
+-- TABLA CON TTL — reservas expiradas (eliminación automática)
+-- Alcance obligatorio: "Configurar TTL (Time-To-Live) para eliminar
+-- reservas expiradas automáticamente".
+--
+-- Contiene las reservas que pierden vigencia (canceladas o pendientes
+-- sin pago). Se insertan con TTL de 90 días (7,776,000 s) configurado
+-- en `default_time_to_live`: Cassandra las elimina SOLAS al expirar, sin
+-- intervención ni job de limpieza. El TTL puede consultarse en vivo con
+-- `SELECT TTL(estado) ...` (segundos restantes).
+--
+-- Las reservas *confirmadas y pagadas* (historial/auditoría) viven
+-- intactas en `reservas` e `historial_pasajero`: solo se expiran las que
+-- dejan de ser válidas.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS aerolinea_db.reservas_expiradas (
+    reserva_id     int PRIMARY KEY,
+    pasajero_id    int,
+    vuelo_id       int,
+    asiento        text,
+    fecha_reserva  timestamp,
+    estado         text           -- cancelada | pendiente
+) WITH default_time_to_live = 7776000;   -- 90 días en segundos

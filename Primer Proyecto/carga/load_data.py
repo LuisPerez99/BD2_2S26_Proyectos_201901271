@@ -138,6 +138,10 @@ def main() -> None:
         "INSERT INTO aerolinea_db.historial_pasajero (pasajero_id, fecha_reserva, reserva_id, vuelo_id, codigo_vuelo, origen, destino, fecha_salida, asiento, clase, estado_reserva, estado_pago, monto, metodo_pago, fecha_pago) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
     s_manif = session.prepare(
         "INSERT INTO aerolinea_db.manifiesto_vuelo (vuelo_id, asiento, pasajero_id, pasajero_nombre, documento, nacionalidad, clase, estado_reserva, estado_pago) VALUES (?,?,?,?,?,?,?,?,?)")
+    # Reservas expiradas (TTL): solo canceladas/pendientes. La tabla
+    # define default_time_to_live; la fila se autoelimina a los 90 días.
+    s_expiradas = session.prepare(
+        "INSERT INTO aerolinea_db.reservas_expiradas (reserva_id, pasajero_id, vuelo_id, asiento, fecha_reserva, estado) VALUES (?,?,?,?,?,?)")
 
     RESERVAS_POR_BATCH = 6  # 6 reservas → 18-24 estamentos por batch
     lotes_reservas = []
@@ -157,6 +161,9 @@ def main() -> None:
                            h["asiento"], h["clase"], h["estado_reserva"],
                            h["estado_pago"], Decimal(h["monto"]), h["metodo_pago"],
                            PARSE_DT(h["fecha_pago"])))
+            if r["estado"] in ("cancelada", "pendiente"):
+                b.add(s_expiradas, (int(rid), int(r["pasajero_id"]), int(r["vuelo_id"]),
+                                    r["asiento"], PARSE_DT(r["fecha_reserva"]), r["estado"]))
             if rid in manifiesto:
                 m = manifiesto[rid]
                 b.add(s_manif, (int(m["vuelo_id"]), m["asiento"], int(m["pasajero_id"]),
@@ -227,8 +234,9 @@ def main() -> None:
     # ------------------------------------------------------------------
     print("5) Conteos finales...")
     for tabla in ("aeronaves", "pasajeros", "vuelos", "asientos_por_vuelo",
-                  "reservas", "pagos_por_reserva", "historial_pasajero",
-                  "manifiesto_vuelo", "conteo_asientos_por_vuelo_clase",
+                  "reservas", "pagos_por_reserva", "reservas_expiradas",
+                  "historial_pasajero", "manifiesto_vuelo",
+                  "conteo_asientos_por_vuelo_clase",
                   "ocupacion_por_ruta_mes", "ingresos_vuelos_por_mes"):
         n = session.execute(f"SELECT COUNT(*) FROM aerolinea_db.{tabla}").one()[0]
         print(f"  {tabla:32s} {n:>8,}")
