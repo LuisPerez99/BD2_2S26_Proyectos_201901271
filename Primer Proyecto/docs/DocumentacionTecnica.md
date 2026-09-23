@@ -2,11 +2,13 @@
 
 ## Sistema de Reservas y Boletos Aéreos sobre Apache Cassandra (aerolinea_db)
 
-**Bases de Datos 2 — Proyecto 1 · Clúster Cassandra de 3 nodos · RF=3 · carné 201901271**
+**Nombre:** Luis Pedro Pérez Monzón
+
+**Carné:** 201901271
 
 ---
 
-## 1. Resumen ejecutivo
+## 1. Introducción
 
 Se implementó la base de datos distribuida de una aerolínea en **Apache
 Cassandra** (clúster de **3 nodos** en Docker), siguiendo el enfoque
@@ -46,6 +48,8 @@ con las reglas:
 - Cada cambio de estado deja un registro en el historial (`1 : N`).
 - Un asiento de un vuelo es exclusivo para un pasajero a la vez.
 
+![Diagrama ER](Imagenes/Diagrama%20ER.png)
+
 | Entidad | Atributos |
 |---|---|
 | Aeronave | aeronave_id, modelo, aerolinea, matricula, capacidad_max |
@@ -67,7 +71,7 @@ sola partición**, y las columnas de clustering proveen orden y rangos nativos.
 Las consultas del negocio (Q1–Q5) se definieron primero; luego se diseñó una
 tabla para cada una.
 
-### 3.0 Keyspace y replicación
+### 3.1 Keyspace y replicación
 
 ```sql
 CREATE KEYSPACE aerolinea_db
@@ -102,7 +106,17 @@ Tablas **base** (fuentes de verdad) y **especializadas** (una por consulta):
 | `ocupacion_por_ruta_mes` | Q4 — COUNTER | ruta | (mes, vuelo_id) |
 | `ingresos_vuelos_por_mes` | Q5 — DETALLE top | mes | (ingreso_total DESC, vuelo_id) |
 
-### 4.1 Tabla base `reservas` (fuente de verdad)
+### 4.1 Mapa query-driven (consultas → tablas)
+
+El siguiente diagrama resume el enfoque **query-driven**: cada consulta del
+negocio (Q1–Q5) se resuelve con una **única tabla especializada** cuya clave de
+partición coincide con el `WHERE` de la query, y cuyas clustering keys proveen
+orden y rangos nativos. Las tablas especializadas se **denormalizan** desde las
+tablas base (indicado con flechas discontinuas) para eliminar JOINs:
+
+![Diagrama Logico](Imagenes/Diagrama%20Logico.png)
+
+### 4.2 Tabla base `reservas` (fuente de verdad)
 
 ```sql
 CREATE TABLE aerolinea_db.reservas (
@@ -115,7 +129,7 @@ CREATE TABLE aerolinea_db.reservas (
 );
 ```
 
-### 4.2 Tabla base `pagos_por_reserva` + `historial_pasajero` (Q2)
+### 4.3 Tabla base `pagos_por_reserva` + `historial_pasajero` (Q2)
 
 Cada reserva tiene **un pago** y se denormaliza su **historial** por pasajero
 para responder Q2 (historial cronológico del pasajero con estado de reserva y
@@ -148,7 +162,7 @@ CREATE TABLE aerolinea_db.historial_pasajero (
 - **Clustering (fecha_reserva, reserva_id) DESC** → orden cronológico inverso
   nativo.
 
-### 4.3 Tabla base `manifiesto_vuelo` (Q3)
+### 4.4 Tabla base `manifiesto_vuelo` (Q3)
 
 Manifiesto del vuelo (asiento, pasajero, documento, clase, estados):
 partition key `vuelo_id`, clustering `asiento` (ordena el manifiesto por
