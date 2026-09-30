@@ -1,0 +1,17 @@
+# Create a neo4j container with docker-compose
+version: '3.8'
+services:
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: "neo4j/admin123"  # Set username and password (min 8 chars)
+      NEO4J_PLUGINS: '["apoc"]'  # Required by the Neo4j MCP server
+      NEO4J_apoc_export_file_enabled: "true"
+    volumes:
+      - neo4j_data:/data
+volumes:
+  neo4j_data:
