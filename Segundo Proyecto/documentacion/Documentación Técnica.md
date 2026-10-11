@@ -1,22 +1,28 @@
-# Análisis de Requerimientos y Modelado Conceptual
+# Documentación Técnica — Sistema de Recomendación de Restaurantes con Neo4j
 
 > **Proyecto:** Sistema de Recomendación de Restaurantes con Neo4j
-> **Fase:** 1 de 6 — Análisis de Requerimientos y Modelado Conceptual
-> **Entregable asociado:** Documentación Técnica (modelo conceptual de grafos)
-> **Estado:** Diseño conceptual (sin implementación en Neo4j)
+> **Materia:** Bases de Datos 2
+> **Motor:** Neo4j 2026.09.0 (Community Edition)
+> **Entregable:** Documentación Técnica
+
+Este documento reúne de forma continua el análisis de requerimientos, el modelo
+conceptual de grafos, el diseño del esquema para Neo4j, la configuración del
+motor, la implementación física y el catálogo de consultas del sistema.
 
 ---
 
-## 1. Propósito de la fase
+## 1. Propósito y alcance
 
-En esta fase se analiza el problema de negocio, se identifican las entidades
-(nodos), sus atributos (propiedades) y las relaciones (aristas) que las conectan,
-y se construye el **modelo conceptual de grafos**. El modelo debe ser lo
-suficientemente expresivo como para responder las consultas de recomendación,
-análisis de redes y detección de patrones definidas en el enunciado.
+El objetivo del proyecto es diseñar e implementar en **Neo4j** una base de datos
+de grafos para un **sistema de recomendación de restaurantes** que combina las
+preferencias individuales de cada usuario con el comportamiento de su círculo
+social. Se identifican las entidades (nodos), sus atributos (propiedades) y las
+relaciones (aristas) que las conectan, y se construye el **modelo conceptual de
+grafos** sobre el que se apoyan las consultas de recomendación y análisis de redes.
 
-El resultado de esta fase es un modelo **independiente del motor**, que en la
-Fase 2 se transformará en el esquema implementable en Neo4j.
+El modelo debe ser lo suficientemente expresivo como para responder las consultas
+de recomendación, análisis de redes y detección de patrones definidas en el
+enunciado.
 
 ---
 
@@ -232,9 +238,9 @@ recursividad SQL para las mismas consultas; el grafo lo expresa de forma directa
 
 ## 7. Catálogo conceptual de consultas de negocio
 
-En esta fase se define **qué debe responder el sistema**; la implementación
-Cypher se aborda en la Fase 5. Se distinguen 5 consultas obligatorias (Q1–Q5) y
-2 análisis de redes (N1–N2).
+En esta sección se define **qué debe responder el sistema**; el diseño de los
+patrones Cypher se detalla en el apartado de consultas (§12). Se distinguen 5
+consultas obligatorias (Q1–Q5) y 2 análisis de redes (N1–N2).
 
 ### 7.1. Consultas obligatorias
 
@@ -277,5 +283,352 @@ Cypher se aborda en la Fase 5. Se distinguen 5 consultas obligatorias (Q1–Q5) 
 | Recomendaciones inteligentes | Q1 (social), Q2 (chefs), Q4/Q5 (patrones de consumo). |
 | Reglas de negocio | §2.3 y su mapeo en §4. |
 | Convenciones de nombres | Etiquetas singular/CamelCase; relaciones MAYÚSCULAS_CON_GUIONES. |
+
+---
+
+## 9. Diseño del esquema de grafos para Neo4j
+
+Esta sección transforma el modelo conceptual en un **esquema implementable en
+Neo4j 5.x**: etiquetas de nodo, propiedades con tipos concretos, tipos de relación
+y decisiones orientadas a las consultas de negocio.
+
+### 9.1. Convenciones de nomenclatura
+
+| Elemento | Convención | Ejemplos |
+| :--- | :--- | :--- |
+| Etiqueta de nodo | Singular, **CamelCase** | `Usuario`, `Restaurante`, `TipoCocina`, `Chef`, `Platillo` |
+| Tipo de relación | **MAYÚSCULAS_CON_GUIONES_BAJOS** | `CALIFICÓ`, `VISITÓ`, `ES_AMIGO_DE`, `PERTENECE_A`, `OFRECE`, `PREPARA`, `TRABAJA_EN`, `LE_GUSTA` |
+| Propiedad | **snake_case**, sin acentos | `usuario_id`, `anio_apertura`, `fecha_nacimiento`, `nivel_interes` |
+| Constraint / índice | Prefijo por tipo | `uniq_usuario_id`, `idx_restaurante_nombre` |
+
+### 9.2. Esquema de nodos
+
+Tipos de datos Neo4j: `STRING`, `INTEGER`, `FLOAT`, `BOOLEAN`, `DATE`. Toda fecha
+se almacena como escalar `date('YYYY-MM-DD')`.
+
+**`Usuario`**
+
+| Propiedad | Tipo Neo4j | Obligatoria | Clave | Descripción |
+| :--- | :--- | :-: | :--- | :--- |
+| `usuario_id` | INTEGER | Sí | **Único** | Identificador lógico (`MERGE`). |
+| `nombre` | STRING | Sí | | Nombre completo. |
+| `email` | STRING | Sí | **Único** | Clave natural; formato válido. |
+| `edad` | INTEGER | Sí | | ≥ 18. |
+| `pais` | STRING | Sí | | País de residencia. |
+
+**`Restaurante`**
+
+| Propiedad | Tipo Neo4j | Obligatoria | Clave | Descripción |
+| :--- | :--- | :-: | :--- | :--- |
+| `restaurante_id` | INTEGER | Sí | **Único** | Identificador lógico. |
+| `nombre` | STRING | Sí | Índice | Nombre del restaurante. |
+| `anio_apertura` | INTEGER | Sí | | Año de apertura. |
+| `rango_precios` | STRING (enum) | Sí | Índice | `Económico` \| `Moderado` \| `Caro` \| `Premium`. |
+| `descripcion` | STRING | No | | Texto libre. |
+
+**`TipoCocina`**
+
+| Propiedad | Tipo Neo4j | Obligatoria | Clave | Descripción |
+| :--- | :--- | :-: | :--- | :--- |
+| `tipo_cocina_id` | INTEGER | Sí | **Único** | Identificador lógico. |
+| `nombre` | STRING | Sí | **Único** | Nombre del tipo (clave natural). |
+| `descripcion` | STRING | No | | Texto libre. |
+
+**`Chef`**
+
+| Propiedad | Tipo Neo4j | Obligatoria | Clave | Descripción |
+| :--- | :--- | :-: | :--- | :--- |
+| `chef_id` | INTEGER | Sí | **Único** | Identificador lógico. |
+| `nombre` | STRING | Sí | | Nombre completo. |
+| `fecha_nacimiento` | DATE | Sí | | Fecha de nacimiento. |
+| `nacionalidad` | STRING | Sí | | País de origen. |
+
+**`Platillo`**
+
+| Propiedad | Tipo Neo4j | Obligatoria | Clave | Descripción |
+| :--- | :--- | :-: | :--- | :--- |
+| `platillo_id` | INTEGER | Sí | **Único** | Identificador lógico. |
+| `nombre` | STRING | Sí | | Nombre del platillo. |
+| `precio` | FLOAT | Sí | | Precio base de referencia (> 0). |
+| `descripcion` | STRING | No | | Texto libre. |
+
+### 9.3. Esquema de relaciones
+
+| Relación | Patrón | Propiedades (tipo) | Cardinalidad |
+| :--- | :--- | :--- | :--- |
+| `CALIFICÓ` | `(:Usuario)-[:CALIFICÓ]->(:Restaurante)` | `puntuacion` (INTEGER 1–5), `fecha` (DATE), `comentario` (STRING, opc.) | N:M |
+| `VISITÓ` | `(:Usuario)-[:VISITÓ]->(:Restaurante)` | `fecha` (DATE), `consumo` (FLOAT), `con_reserva` (BOOLEAN) | N:M |
+| `ES_AMIGO_DE` | `(:Usuario)-[:ES_AMIGO_DE]->(:Usuario)` | `fecha_amistad` (DATE) | N:M |
+| `PERTENECE_A` | `(:Restaurante)-[:PERTENECE_A]->(:TipoCocina)` | — | N:M |
+| `OFRECE` | `(:Restaurante)-[:OFRECE]->(:Platillo)` | `precio` (FLOAT), `disponible` (BOOLEAN) | N:M |
+| `PREPARA` | `(:Chef)-[:PREPARA]->(:Platillo)` | `estilo` (STRING), `especialidad` (BOOLEAN) | N:M |
+| `TRABAJA_EN` | `(:Chef)-[:TRABAJA_EN]->(:Restaurante)` | `fecha_inicio` (DATE), `puesto` (STRING) | N:M |
+| `LE_GUSTA` | `(:Usuario)-[:LE_GUSTA]->(:TipoCocina)` | `nivel_interes` (INTEGER 1–5) | N:M |
+
+Todas las relaciones se modelan **dirigidas**. `ES_AMIGO_DE` se interpreta como
+amistad recíproca y, para robustez del traversal, se generan **ambos arcos**
+(`A→B` y `B→A`) en la carga; `PERTENECE_A` no lleva propiedades (relación pura de
+clasificación).
+
+### 9.4. Mapeo conceptual → físico
+
+| Concepto (modelo conceptual) | Implementación (Neo4j) |
+| :--- | :--- |
+| Entidad | Etiqueta de nodo + propiedades |
+| Relación con atributos | Tipo de relación + propiedades de relación |
+| Identificador de entidad | Propiedad `*_id` con constraint `UNIQUE` (`MERGE`) |
+| Clave natural | `Usuario.email`, `TipoCocina.nombre` (`UNIQUE`) |
+| Regla "un restaurante no ofrece dos veces el mismo platillo" | `MERGE (:Restaurante {id})-[:OFRECE]->(:Platillo {id})` |
+| Rango de precios categórico | Propiedad `rango_precios` (enum) + mapeo a consumo esperado en Q4 |
+
+### 9.5. Decisiones de diseño orientadas a las consultas
+
+| # | Decisión | Consulta beneficiada | Motivo |
+| :-: | :--- | :--- | :--- |
+| D1 | Dos relaciones separadas `CALIFICÓ` y `VISITÓ`. | Q1, Q3, Q4, Q5 | Calificación y visita tienen atributos y semántica distintos. |
+| D2 | `puntuacion` como propiedad de `CALIFICÓ`. | Q1, Q2, Q3 | Permite agregaciones por par usuario–restaurante. |
+| D3 | `con_reserva` y `consumo` en `VISITÓ`. | Q3, Q4 | Son atributos del evento de visita. |
+| D4 | `ES_AMIGO_DE` replicada en ambos sentidos. | Q1, N1 | `shortestPath` y el traversal `*1..3` funcionan en cualquier dirección. |
+| D5 | `rango_precios` como enum con mapeo a consumo esperado. | Q4 | Calcula `consumo_real − consumo_esperado` sin tabla auxiliar. |
+| D6 | Índices en `Restaurante.nombre` y `Chef.nacionalidad`. | búsquedas puntuales | Acelera filtros y selecciones concretas. |
+| D7 | Constraints `UNIQUE` en todos los `*_id`. | Carga masiva | Habilita `MERGE` sin duplicados y acelera la carga. |
+| D8 | `PERTENECE_A` sin propiedades. | Q5 | Es una clasificación pura; mantiene el grafo limpio. |
+
+---
+
+## 10. Constraints, índices e implementación física
+
+El esquema físico se implementa con los scripts `ddl/01_constraints.cypher` y
+`ddl/02_indexes.cypher`, ejecutados sobre la base `neo4j`.
+
+### 10.1. Constraints de unicidad (7, aplicados)
+
+| Nombre | Tipo | Etiqueta | Propiedad |
+| :--- | :--- | :--- | :--- |
+| `uniq_usuario_id` | UNICIDAD | `Usuario` | `usuario_id` |
+| `uniq_usuario_email` | UNICIDAD | `Usuario` | `email` |
+| `uniq_restaurante_id` | UNICIDAD | `Restaurante` | `restaurante_id` |
+| `uniq_chef_id` | UNICIDAD | `Chef` | `chef_id` |
+| `uniq_platillo_id` | UNICIDAD | `Platillo` | `platillo_id` |
+| `uniq_tipococina_id` | UNICIDAD | `TipoCocina` | `tipo_cocina_id` |
+| `uniq_tipococina_nombre` | UNICIDAD | `TipoCocina` | `nombre` |
+
+### 10.2. Índices secundarios (10, aplicados)
+
+| Índice | Etiqueta / Relación | Propiedad |
+| :--- | :--- | :--- |
+| `idx_restaurante_nombre` | `Restaurante` | `nombre` |
+| `idx_restaurante_rango` | `Restaurante` | `rango_precios` |
+| `idx_restaurante_anio` | `Restaurante` | `anio_apertura` |
+| `idx_chef_nacionalidad` | `Chef` | `nacionalidad` |
+| `idx_usuario_pais` | `Usuario` | `pais` |
+| `idx_platillo_precio` | `Platillo` | `precio` |
+| `idx_califico_puntuacion` | `CALIFICÓ` | `puntuacion` |
+| `idx_visito_fecha` | `VISITÓ` | `fecha` |
+| `idx_visito_reserva` | `VISITÓ` | `con_reserva` |
+| `idx_trabajaen_puesto` | `TRABAJA_EN` | `puesto` |
+
+### 10.3. Reglas de negocio no declarativas
+
+| Regla | Estrategia de integridad |
+| :--- | :--- |
+| RN4 — puntuación ∈ [1,5] | Validación en la generación de datos y filtros `WHERE` en las consultas. |
+| RN5 — unicidad `(Restaurante)-[:OFRECE]->(Platillo)` | `MERGE` sobre el patrón completo en la carga. |
+| Existencia de propiedades obligatorias | `IS NOT NULL` — exclusivo de Neo4j **Enterprise** (no aplica en Community). |
+
+### 10.4. Evidencia de verificación
+
+| Verificación | Comando | Resultado |
+| :--- | :--- | :--- |
+| Conectividad | `RETURN 1` | `ok = 1` |
+| Constraints activos | `SHOW CONSTRAINTS` | **7** (todos `ONLINE`) |
+| Índices activos | `SHOW INDEXES` | **17** (10 explícitos + 7 de respaldo, `ONLINE`) |
+| Import montado | `ls /import` | Visible y en **solo lectura** |
+| `LOAD CSV` operativo | `LOAD CSV ... FROM 'file:///_smoke.csv'` | Lee el archivo correctamente |
+
+---
+
+## 11. Configuración del entorno e implementación física
+
+### 11.1. Entorno y versiones
+
+| Componente | Versión / valor |
+| :--- | :--- |
+| Motor | Neo4j Kernel **2026.09.0** (Community Edition) |
+| Lenguaje | Cypher 5.25 |
+| Contenedor | Docker 29.9.0 + Docker Compose v5.6.0 (`neo4j:latest`) |
+| Base de datos | `neo4j` (por defecto) |
+| Usuario / contraseña | `neo4j` / `admin123` |
+| Bolt | `bolt://localhost:7687` |
+| HTTP / Browser | `http://localhost:7474` |
+| Plugins | APOC habilitado |
+
+### 11.2. Estructura del proyecto
+
+```
+Segundo Proyecto/
+├── data/                      # CSVs de carga, montado en /import (solo lectura)
+├── ddl/
+│   ├── 00_reset.cypher        # Vaciar la base (desarrollo)
+│   ├── 01_constraints.cypher  # Constraints de unicidad
+│   └── 02_indexes.cypher      # Índices secundarios
+├── docker/
+│   └── docker-compose.yml     # Definición del contenedor Neo4j
+├── documentacion/
+│   └── Documentación Técnica.md
+└── src/
+    └── main.py                # Conexión de prueba vía neo4j-driver
+```
+
+### 11.3. Configuración de Neo4j (`docker/docker-compose.yml`)
+
+| Ajuste | Valor | Motivo |
+| :--- | :--- | :--- |
+| `NEO4J_AUTH` | `neo4j/admin123` | Credenciales del proyecto (mínimo 8 caracteres). |
+| `NEO4J_PLUGINS` | `["apoc"]` | Requerido por el MCP de Neo4j. |
+| Heap inicial / máximo | `512m` / `2G` | Memoria de la JVM para consultas de agregación. |
+| Page cache | `1G` | Caché de páginas del grafo. |
+| `allow_csv_import_from_file_urls` | `true` | Permite `LOAD CSV` desde `file:///`. |
+| `NEO4J_server_directories_import` | `/import` | Directorio de importación de los CSV. |
+| Volumen `neo4j_data` → `/data` | Named volume | Persistencia de la base entre reinicios. |
+| Bind `../data` → `/import:ro` | Solo lectura | CSVs visibles al contenedor **sin** modificar su dueño. |
+
+> **Nota de diseño:** la carpeta de importación se monta **solo lectura** en
+> `/import`. El `entrypoint` de la imagen Neo4j solo chown-ea su *home*
+> (`/var/lib/neo4j`) y `/data`; al usar `/import` como ruta personalizada se evita
+> que el host pierda la propiedad de los archivos CSV.
+
+### 11.4. Puesta en marcha
+
+```bash
+cd docker
+docker compose up -d
+docker exec neo4j cypher-shell -u neo4j -p admin123 "RETURN 1 AS ok;"
+```
+
+### 11.5. Aplicación del esquema
+
+```bash
+docker exec -i neo4j cypher-shell -u neo4j -p admin123 < ddl/01_constraints.cypher
+docker exec -i neo4j cypher-shell -u neo4j -p admin123 < ddl/02_indexes.cypher
+```
+
+### 11.6. Reproducción desde cero
+
+```bash
+cd docker && docker compose up -d
+cd ..
+docker exec -i neo4j cypher-shell -u neo4j -p admin123 < ddl/00_reset.cypher
+docker exec -i neo4j cypher-shell -u neo4j -p admin123 < ddl/01_constraints.cypher
+docker exec -i neo4j cypher-shell -u neo4j -p admin123 < ddl/02_indexes.cypher
+```
+
+---
+
+## 12. Diseño de las consultas en Cypher (patrones)
+
+Diseño de alto nivel (patrón y cláusulas previstas) de las 5 consultas
+obligatorias (Q1–Q5) y los 2 análisis de red (N1–N2).
+
+### 12.1. Mapeo `rango_precios` → consumo esperado (Q4)
+
+| `rango_precios` | Consumo esperado (referencia) |
+| :--- | ---: |
+| `Económico` | 100 |
+| `Moderado` | 250 |
+| `Caro` | 500 |
+| `Premium` | 900 |
+
+### Q1 — Recomendación social (amigos hasta 3 grados)
+
+```cypher
+MATCH (u:Usuario {email: $email})-[:ES_AMIGO_DE*1..3]-(amigo:Usuario)
+MATCH (amigo)-[c:CALIFICÓ]->(r:Restaurante)
+WHERE c.puntuacion >= 4
+  AND NOT (u)-[:VISITÓ]->(r)
+RETURN r.nombre,
+       count(DISTINCT amigo) AS amigos_coincidentes,
+       avg(c.puntuacion)     AS calificacion_prom
+ORDER BY amigos_coincidentes DESC, calificacion_prom DESC;
+```
+
+### Q2 — Chefs de alto impacto
+
+```cypher
+MATCH (chef:Chef)-[:TRABAJA_EN]->(r:Restaurante)<-[c:CALIFICÓ]-(:Usuario)
+WITH chef, r, avg(c.puntuacion) AS prom_r
+WHERE prom_r > 4
+MATCH (chef)-[:PREPARA]->(p:Platillo)<-[:OFRECE]-(otro:Restaurante)
+RETURN chef.nombre, count(DISTINCT otro) AS restaurantes_platillo
+ORDER BY restaurantes_platillo DESC;
+```
+
+### Q3 — Restaurantes infravalorados
+
+```cypher
+MATCH (r:Restaurante)<-[v:VISITÓ]-(:Usuario)
+WITH r, avg(CASE WHEN v.con_reserva THEN 1.0 ELSE 0.0 END) AS tasa_reserva
+// rating por restaurante + promedios globales en WITH posterior;
+// devolver restaurantes con tasa_reserva > prom_global_reserva
+//   AND rating < prom_global_rating
+```
+
+### Q4 — Precio declarado vs. consumo real
+
+```cypher
+MATCH (r:Restaurante)<-[v:VISITÓ]-(:Usuario)
+WITH r, avg(v.consumo) AS consumo_real
+WITH r, consumo_real,
+     CASE r.rango_precios
+       WHEN 'Económico' THEN 100.0
+       WHEN 'Moderado'  THEN 250.0
+       WHEN 'Caro'      THEN 500.0
+       WHEN 'Premium'   THEN 900.0
+       ELSE 0.0 END AS consumo_esperado
+RETURN r.nombre, r.rango_precios, consumo_real, consumo_esperado,
+       (consumo_real - consumo_esperado) AS diferencia
+ORDER BY diferencia DESC;
+```
+
+### Q5 — Cocina declarada vs. realmente visitada
+
+```cypher
+// (1) cocina declarada favorita: u-[:LE_GUSTA]->t (mayor nivel_interes)
+// (2) cocina realmente visitada: u-[:VISITÓ]->r-[:PERTENECE_A]->t contada
+// comparar y marcar discrepancia cuando no coinciden
+```
+
+### N1 — Ruta más corta entre usuarios
+
+```cypher
+MATCH (a:Usuario {email: $a}), (b:Usuario {email: $b}),
+      p = shortestPath((a)-[:ES_AMIGO_DE*..10]-(b))
+RETURN length(p) AS grados_de_separacion, [n IN nodes(p) | n.nombre] AS camino;
+```
+
+### N2 — Restaurantes altamente conectados
+
+```cypher
+MATCH (r:Restaurante)
+OPTIONAL MATCH (r)<-[:TRABAJA_EN]-(c:Chef)
+OPTIONAL MATCH (r)-[:OFRECE]->(p:Platillo)
+RETURN r.nombre, count(DISTINCT c) AS num_chefs, count(DISTINCT p) AS num_platillos
+ORDER BY (count(DISTINCT c) + count(DISTINCT p)) DESC;
+```
+
+---
+
+## 13. Conclusiones
+
+1. El dominio se representa de forma natural con **5 tipos de nodo** y
+   **8 tipos de relación**, con propiedades en nodos y aristas, cubriendo las
+   **6 reglas de negocio** del enunciado.
+2. El esquema Neo4j queda implementado con **7 constraints** de unicidad y
+   **10 índices** secundarios, todos `ONLINE`, sobre Neo4j 2026.09.0 Community.
+3. Las **5 consultas obligatorias** y los **2 análisis de redes** son expresables
+   como patrones de traversal multi-nivel, lo que valida la idoneidad del enfoque
+   de grafos frente a un modelo relacional.
+4. El entorno es reproducible vía Docker Compose y la carpeta de importación
+   (`/import`, solo lectura) habilita la carga masiva con `LOAD CSV`.
 
 ---
