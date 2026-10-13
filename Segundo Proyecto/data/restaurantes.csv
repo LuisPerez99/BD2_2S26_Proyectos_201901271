@@ -1,0 +1,201 @@
+restaurante_id,nombre,año_apertura,rango_precios,descripcion
+1,Casa Tradicional,2001,Caro,Restaurante de cocina variada fundado en 2001.
+2,Mesa del Centro,1982,Económico,Restaurante de cocina variada fundado en 1982.
+3,Terraza Nova,2000,Moderado,Restaurante de cocina variada fundado en 2000.
+4,Fogón Selecto,1986,Moderado,Restaurante de cocina variada fundado en 1986.
+5,La Trattoria del Puerto,1975,Económico,Restaurante de cocina variada fundado en 1975.
+6,Sabores,2020,Caro,Restaurante de cocina variada fundado en 2020.
+7,Cantina & Co,2015,Moderado,Restaurante de cocina variada fundado en 2015.
+8,Terraza Tradicional,2011,Económico,Restaurante de cocina variada fundado en 2011.
+9,Arcada Nova,2006,Económico,Restaurante de cocina variada fundado en 2006.
+10,Mesa Nova,2017,Económico,Restaurante de cocina variada fundado en 2017.
+11,Huerto del Puerto,1990,Moderado,Restaurante de cocina variada fundado en 1990.
+12,Casa del Puerto,2017,Moderado,Restaurante de cocina variada fundado en 2017.
+13,Sabores Nova,1972,Moderado,Restaurante de cocina variada fundado en 1972.
+14,Fogón Tradicional,2005,Moderado,Restaurante de cocina variada fundado en 2005.
+15,Bistró del Valle,2005,Moderado,Restaurante de cocina variada fundado en 2005.
+16,Cocina Real,1974,Económico,Restaurante de cocina variada fundado en 1974.
+17,Raíces Tradicional,1986,Moderado,Restaurante de cocina variada fundado en 1986.
+18,Brasa Selecto,2001,Moderado,Restaurante de cocina variada fundado en 2001.
+19,Casa Real,2019,Económico,Restaurante de cocina variada fundado en 2019.
+20,Delicias & Co,2021,Premium,Restaurante de cocina variada fundado en 2021.
+21,Casa Nova,1980,Moderado,Restaurante de cocina variada fundado en 1980.
+22,Sabor Premium,1988,Caro,Restaurante de cocina variada fundado en 1988.
+23,Rincón del Centro,2010,Económico,Restaurante de cocina variada fundado en 2010.
+24,Sabor Familiar,1971,Caro,Restaurante de cocina variada fundado en 1971.
+25,Cantina Premium,1978,Moderado,Restaurante de cocina variada fundado en 1978.
+26,La Trattoria,2008,Moderado,Restaurante de cocina variada fundado en 2008.
+27,El Rincón de Autor,2007,Caro,Restaurante de cocina variada fundado en 2007.
+28,Mirador Tradicional,2015,Económico,Restaurante de cocina variada fundado en 2015.
+29,Terraza del Valle,2020,Moderado,Restaurante de cocina variada fundado en 2020.
+30,Bistró Moderno,1973,Moderado,Restaurante de cocina variada fundado en 1973.
+31,Estancia del Puerto,2000,Económico,Restaurante de cocina variada fundado en 2000.
+32,Rincón Tradicional,1993,Moderado,Restaurante de cocina variada fundado en 1993.
+33,Estancia del Valle,1989,Premium,Restaurante de cocina variada fundado en 1989.
+34,Mirador Gourmet,1987,Caro,Restaurante de cocina variada fundado en 1987.
+35,Fogón Real,1988,Moderado,Restaurante de cocina variada fundado en 1988.
+36,Sabor Tradicional,1989,Premium,Restaurante de cocina variada fundado en 1989.
+37,Mirador Familiar,1998,Económico,Restaurante de cocina variada fundado en 1998.
+38,Mirador Nova,1986,Moderado,Restaurante de cocina variada fundado en 1986.
+39,Oasis Familiar,2017,Económico,Restaurante de cocina variada fundado en 2017.
+40,Cantina Selecto,2020,Caro,Restaurante de cocina variada fundado en 2020.
+41,Brasa de Autor,1982,Económico,Restaurante de cocina variada fundado en 1982.
+42,Brasa,2002,Moderado,Restaurante de cocina variada fundado en 2002.
+43,Casa Moderno,2013,Caro,Restaurante de cocina variada fundado en 2013.
+44,Estancia Tradicional,1977,Moderado,Restaurante de cocina variada fundado en 1977.
+45,Delicias de Autor,2024,Premium,Restaurante de cocina variada fundado en 2024.
+46,Huerto Tradicional,1974,Moderado,Restaurante de cocina variada fundado en 1974.
+47,Cocina Premium,1971,Moderado,Restaurante de cocina variada fundado en 1971.
+48,Cocina de la Plaza,1975,Premium,Restaurante de cocina variada fundado en 1975.
+49,Arcada Tradicional,1993,Moderado,Restaurante de cocina variada fundado en 1993.
+50,Arcada del Centro,1982,Moderado,Restaurante de cocina variada fundado en 1982.
+51,Estancia Selecto,2009,Moderado,Restaurante de cocina variada fundado en 2009.
+52,Estancia del Centro,2006,Moderado,Restaurante de cocina variada fundado en 2006.
+53,Estancia Gourmet,2007,Caro,Restaurante de cocina variada fundado en 2007.
+54,Oasis & Co,2006,Premium,Restaurante de cocina variada fundado en 2006.
+55,Rincón Selecto,2017,Moderado,Restaurante de cocina variada fundado en 2017.
+56,El Rincón Tradicional,1978,Premium,Restaurante de cocina variada fundado en 1978.
+57,Delicias,1970,Moderado,Restaurante de cocina variada fundado en 1970.
+58,La Trattoria de Autor,1974,Económico,Restaurante de cocina variada fundado en 1974.
+59,Oasis Tradicional,1975,Económico,Restaurante de cocina variada fundado en 1975.
+60,Mesa Gourmet,1988,Caro,Restaurante de cocina variada fundado en 1988.
+61,Cocina Selecto,2022,Premium,Restaurante de cocina variada fundado en 2022.
+62,Sabores Real,1972,Moderado,Restaurante de cocina variada fundado en 1972.
+63,Brasa de la Plaza,1970,Caro,Restaurante de cocina variada fundado en 1970.
+64,Raíces del Centro,1983,Moderado,Restaurante de cocina variada fundado en 1983.
+65,Cantina Familiar,1977,Moderado,Restaurante de cocina variada fundado en 1977.
+66,Oasis Real,2008,Caro,Restaurante de cocina variada fundado en 2008.
+67,Brasa Moderno,2016,Moderado,Restaurante de cocina variada fundado en 2016.
+68,La Trattoria Selecto,2020,Moderado,Restaurante de cocina variada fundado en 2020.
+69,Sabor Nova,2013,Moderado,Restaurante de cocina variada fundado en 2013.
+70,Fogón de Autor,1976,Económico,Restaurante de cocina variada fundado en 1976.
+71,Fogón Nova,2001,Moderado,Restaurante de cocina variada fundado en 2001.
+72,Sabores del Valle,2009,Económico,Restaurante de cocina variada fundado en 2009.
+73,Terraza de Autor,1980,Económico,Restaurante de cocina variada fundado en 1980.
+74,La Trattoria Gourmet,2014,Económico,Restaurante de cocina variada fundado en 2014.
+75,Brasa del Centro,1995,Económico,Restaurante de cocina variada fundado en 1995.
+76,Rincón del Puerto,2009,Moderado,Restaurante de cocina variada fundado en 2009.
+77,Terraza de la Plaza,1972,Moderado,Restaurante de cocina variada fundado en 1972.
+78,Arcada,2023,Moderado,Restaurante de cocina variada fundado en 2023.
+79,El Rincón & Co,1977,Moderado,Restaurante de cocina variada fundado en 1977.
+80,Huerto Selecto,1996,Moderado,Restaurante de cocina variada fundado en 1996.
+81,Bistró del Puerto,2002,Moderado,Restaurante de cocina variada fundado en 2002.
+82,Sabor de la Plaza,2022,Económico,Restaurante de cocina variada fundado en 2022.
+83,Sabores Tradicional,1970,Moderado,Restaurante de cocina variada fundado en 1970.
+84,Rincón & Co,1995,Moderado,Restaurante de cocina variada fundado en 1995.
+85,Fogón Premium,1998,Económico,Restaurante de cocina variada fundado en 1998.
+86,Arcada Selecto,2019,Caro,Restaurante de cocina variada fundado en 2019.
+87,Mesa Premium,2018,Caro,Restaurante de cocina variada fundado en 2018.
+88,La Trattoria & Co,1999,Moderado,Restaurante de cocina variada fundado en 1999.
+89,Cocina,1995,Caro,Restaurante de cocina variada fundado en 1995.
+90,El Rincón Nova,2023,Caro,Restaurante de cocina variada fundado en 2023.
+91,El Rincón Moderno,1998,Moderado,Restaurante de cocina variada fundado en 1998.
+92,Bistró Real,1979,Caro,Restaurante de cocina variada fundado en 1979.
+93,Raíces Nova,1995,Caro,Restaurante de cocina variada fundado en 1995.
+94,Mesa de Autor,1972,Económico,Restaurante de cocina variada fundado en 1972.
+95,Bistró del Centro,1998,Económico,Restaurante de cocina variada fundado en 1998.
+96,Arcada del Valle,2002,Económico,Restaurante de cocina variada fundado en 2002.
+97,Terraza del Puerto,1993,Moderado,Restaurante de cocina variada fundado en 1993.
+98,El Rincón del Centro,2014,Premium,Restaurante de cocina variada fundado en 2014.
+99,Sabores de Autor,2019,Económico,Restaurante de cocina variada fundado en 2019.
+100,El Rincón Premium,1979,Económico,Restaurante de cocina variada fundado en 1979.
+101,Cantina Nova,1989,Moderado,Restaurante de cocina variada fundado en 1989.
+102,Mesa de la Plaza,1970,Premium,Restaurante de cocina variada fundado en 1970.
+103,Bistró de la Plaza,1974,Moderado,Restaurante de cocina variada fundado en 1974.
+104,Terraza,1977,Moderado,Restaurante de cocina variada fundado en 1977.
+105,Mirador del Centro,2023,Moderado,Restaurante de cocina variada fundado en 2023.
+106,Delicias del Valle,2017,Moderado,Restaurante de cocina variada fundado en 2017.
+107,Mirador Selecto,2024,Moderado,Restaurante de cocina variada fundado en 2024.
+108,Raíces & Co,1986,Moderado,Restaurante de cocina variada fundado en 1986.
+109,Cocina Gourmet,1991,Moderado,Restaurante de cocina variada fundado en 1991.
+110,Mesa Moderno,2012,Económico,Restaurante de cocina variada fundado en 2012.
+111,Terraza Moderno,2010,Moderado,Restaurante de cocina variada fundado en 2010.
+112,Sabores del Centro,1992,Moderado,Restaurante de cocina variada fundado en 1992.
+113,Estancia de la Plaza,2002,Moderado,Restaurante de cocina variada fundado en 2002.
+114,Sabor,1997,Caro,Restaurante de cocina variada fundado en 1997.
+115,Delicias Premium,1989,Caro,Restaurante de cocina variada fundado en 1989.
+116,Mesa del Valle,2013,Premium,Restaurante de cocina variada fundado en 2013.
+117,Casa,1993,Moderado,Restaurante de cocina variada fundado en 1993.
+118,Arcada de Autor,2021,Moderado,Restaurante de cocina variada fundado en 2021.
+119,Sabor Real,1981,Económico,Restaurante de cocina variada fundado en 1981.
+120,Terraza & Co,2011,Económico,Restaurante de cocina variada fundado en 2011.
+121,Mirador Real,2021,Económico,Restaurante de cocina variada fundado en 2021.
+122,Sabor Gourmet,2023,Moderado,Restaurante de cocina variada fundado en 2023.
+123,Sabores Familiar,2019,Moderado,Restaurante de cocina variada fundado en 2019.
+124,Brasa Premium,1994,Económico,Restaurante de cocina variada fundado en 1994.
+125,Delicias Familiar,1992,Económico,Restaurante de cocina variada fundado en 1992.
+126,Cocina de Autor,2018,Moderado,Restaurante de cocina variada fundado en 2018.
+127,El Rincón,1995,Moderado,Restaurante de cocina variada fundado en 1995.
+128,La Trattoria Tradicional,1997,Caro,Restaurante de cocina variada fundado en 1997.
+129,Rincón Nova,2016,Económico,Restaurante de cocina variada fundado en 2016.
+130,Estancia Nova,2006,Económico,Restaurante de cocina variada fundado en 2006.
+131,Mirador & Co,1978,Caro,Restaurante de cocina variada fundado en 1978.
+132,Fogón de la Plaza,1980,Económico,Restaurante de cocina variada fundado en 1980.
+133,Sabores del Puerto,1975,Moderado,Restaurante de cocina variada fundado en 1975.
+134,Oasis,2020,Moderado,Restaurante de cocina variada fundado en 2020.
+135,Estancia & Co,1987,Caro,Restaurante de cocina variada fundado en 1987.
+136,Bistró de Autor,1986,Moderado,Restaurante de cocina variada fundado en 1986.
+137,Huerto Real,1987,Moderado,Restaurante de cocina variada fundado en 1987.
+138,Terraza Premium,1977,Moderado,Restaurante de cocina variada fundado en 1977.
+139,Huerto Nova,2018,Premium,Restaurante de cocina variada fundado en 2018.
+140,Mirador del Puerto,1995,Moderado,Restaurante de cocina variada fundado en 1995.
+141,Estancia,2004,Moderado,Restaurante de cocina variada fundado en 2004.
+142,Delicias Gourmet,1998,Moderado,Restaurante de cocina variada fundado en 1998.
+143,Cantina del Puerto,1974,Económico,Restaurante de cocina variada fundado en 1974.
+144,El Rincón del Valle,1982,Moderado,Restaurante de cocina variada fundado en 1982.
+145,Cantina del Centro,1992,Caro,Restaurante de cocina variada fundado en 1992.
+146,Arcada de la Plaza,2013,Premium,Restaurante de cocina variada fundado en 2013.
+147,Huerto & Co,1970,Moderado,Restaurante de cocina variada fundado en 1970.
+148,El Rincón Familiar,1980,Caro,Restaurante de cocina variada fundado en 1980.
+149,Raíces Moderno,2009,Caro,Restaurante de cocina variada fundado en 2009.
+150,Raíces Gourmet,1994,Moderado,Restaurante de cocina variada fundado en 1994.
+151,Brasa Real,2006,Caro,Restaurante de cocina variada fundado en 2006.
+152,La Trattoria Nova,1976,Económico,Restaurante de cocina variada fundado en 1976.
+153,Cocina & Co,1991,Moderado,Restaurante de cocina variada fundado en 1991.
+154,Cantina Gourmet,1987,Moderado,Restaurante de cocina variada fundado en 1987.
+155,Fogón del Valle,1998,Moderado,Restaurante de cocina variada fundado en 1998.
+156,Oasis Moderno,2008,Económico,Restaurante de cocina variada fundado en 2008.
+157,Sabor Selecto,1979,Económico,Restaurante de cocina variada fundado en 1979.
+158,Terraza Real,1973,Económico,Restaurante de cocina variada fundado en 1973.
+159,Sabores de la Plaza,2014,Económico,Restaurante de cocina variada fundado en 2014.
+160,Oasis Nova,1993,Moderado,Restaurante de cocina variada fundado en 1993.
+161,Oasis de la Plaza,1977,Moderado,Restaurante de cocina variada fundado en 1977.
+162,Raíces Real,1999,Económico,Restaurante de cocina variada fundado en 1999.
+163,Sabor del Centro,1990,Moderado,Restaurante de cocina variada fundado en 1990.
+164,La Trattoria del Centro,1982,Económico,Restaurante de cocina variada fundado en 1982.
+165,Raíces Premium,2019,Premium,Restaurante de cocina variada fundado en 2019.
+166,Casa Familiar,1973,Premium,Restaurante de cocina variada fundado en 1973.
+167,Terraza Familiar,2017,Moderado,Restaurante de cocina variada fundado en 2017.
+168,Delicias Moderno,1978,Económico,Restaurante de cocina variada fundado en 1978.
+169,Fogón Familiar,2003,Económico,Restaurante de cocina variada fundado en 2003.
+170,Oasis Selecto,2018,Moderado,Restaurante de cocina variada fundado en 2018.
+171,Cocina Tradicional,2009,Moderado,Restaurante de cocina variada fundado en 2009.
+172,La Trattoria de la Plaza,1982,Caro,Restaurante de cocina variada fundado en 1982.
+173,Huerto Premium,2004,Económico,Restaurante de cocina variada fundado en 2004.
+174,Casa del Centro,1998,Económico,Restaurante de cocina variada fundado en 1998.
+175,Terraza Gourmet,2014,Moderado,Restaurante de cocina variada fundado en 2014.
+176,Bistró & Co,1991,Moderado,Restaurante de cocina variada fundado en 1991.
+177,Delicias de la Plaza,1988,Caro,Restaurante de cocina variada fundado en 1988.
+178,Bistró Gourmet,2023,Moderado,Restaurante de cocina variada fundado en 2023.
+179,Sabores Premium,2019,Caro,Restaurante de cocina variada fundado en 2019.
+180,Sabores & Co,1983,Premium,Restaurante de cocina variada fundado en 1983.
+181,Rincón Real,1985,Caro,Restaurante de cocina variada fundado en 1985.
+182,Casa de la Plaza,2012,Caro,Restaurante de cocina variada fundado en 2012.
+183,Delicias Nova,1971,Premium,Restaurante de cocina variada fundado en 1971.
+184,Mirador Premium,1994,Caro,Restaurante de cocina variada fundado en 1994.
+185,Cantina Tradicional,1983,Económico,Restaurante de cocina variada fundado en 1983.
+186,Estancia Familiar,1982,Moderado,Restaurante de cocina variada fundado en 1982.
+187,La Trattoria del Valle,1980,Caro,Restaurante de cocina variada fundado en 1980.
+188,Rincón de Autor,1988,Moderado,Restaurante de cocina variada fundado en 1988.
+189,Brasa del Puerto,2018,Moderado,Restaurante de cocina variada fundado en 2018.
+190,Casa del Valle,1987,Premium,Restaurante de cocina variada fundado en 1987.
+191,Fogón del Puerto,1990,Económico,Restaurante de cocina variada fundado en 1990.
+192,Rincón Familiar,1999,Caro,Restaurante de cocina variada fundado en 1999.
+193,Cocina Nova,1973,Caro,Restaurante de cocina variada fundado en 1973.
+194,Casa de Autor,1988,Moderado,Restaurante de cocina variada fundado en 1988.
+195,Raíces Familiar,2004,Premium,Restaurante de cocina variada fundado en 2004.
+196,Mesa Real,2007,Moderado,Restaurante de cocina variada fundado en 2007.
+197,La Trattoria Real,2014,Moderado,Restaurante de cocina variada fundado en 2014.
+198,Arcada & Co,1998,Moderado,Restaurante de cocina variada fundado en 1998.
+199,Fogón Gourmet,1975,Premium,Restaurante de cocina variada fundado en 1975.
+200,Mesa Familiar,1989,Caro,Restaurante de cocina variada fundado en 1989.

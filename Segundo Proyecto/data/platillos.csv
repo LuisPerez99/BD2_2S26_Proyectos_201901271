@@ -1,0 +1,51 @@
+platillo_id,nombre,precio,descripcion
+1,Pizza Margarita,65.00,"Masa fina, tomate y mozzarella fresca."
+2,Lasaña Boloñesa,80.00,Capas de pasta con ragú de res.
+3,Risotto de Hongos,95.00,Arroz cremoso con hongos de temporada.
+4,Sushi Roll California,110.00,"Roll con cangrejo, aguacate y pepino."
+5,Ramen Tonkotsu,85.00,Caldo de hueso de cerdo y fideos frescos.
+6,Tacos al Pastor,45.00,Cerdo adobado con piña y cilantro.
+7,Enchiladas Verdes,70.00,Tortillas rellenas con salsa verde.
+8,Pollo Kung Pao,75.00,Pollo salteado con maní y chile.
+9,Dim Sum Variado,90.00,Bocadillos al vapor de varios sabores.
+10,Curry de Pollo,78.00,Pollo en salsa de curry y leche de coco.
+11,Pad Thai,82.00,Fideos de arroz con tamarindo y cacahuate.
+12,Ratatouille,88.00,Verduras provenzales guisadas al horno.
+13,Coq au Vin,140.00,Pollo brasado en vino tinto.
+14,Paella Valenciana,150.00,"Arroz con mariscos, pollo y azafrán."
+15,Tortilla Española,60.00,Tortilla de patatas y cebolla.
+16,Moussaka,92.00,"Berenjena, carne y salsa bechamel."
+17,Ceviche Clásico,85.00,Pescado fresco en leche de tigre.
+18,Lomo Saltado,105.00,Lomo de res salteado con papas y arroz.
+19,Feijoada,98.00,Guiso de frijoles negros con carnes.
+20,Churrasco Mixto,160.00,Parrillada de cortes de res y cerdo.
+21,Bibimbap,76.00,"Arroz con verduras, huevo y gochujang."
+22,Kimchi Jjigae,68.00,Guiso picante de kimchi y cerdo.
+23,Pho Bo,72.00,Sopa de res con hierbas y fideos de arroz.
+24,Rollos de Primavera,55.00,Rollos frescos con vegetales y camarón.
+25,Hummus con Pita,48.00,Pure de garbanzo con pan plano.
+26,Hamburguesa Clásica,70.00,"Res, queso, lechuga y tomate."
+27,Baby Back Ribs,130.00,Costillas de cerdo con salsa BBQ.
+28,Alitas Buffalo,62.00,Alitas fritas con salsa picante.
+29,Ensalada César,58.00,"Lechuga romana, parmesano y aderezo césar."
+30,Sopa de Tomate,42.00,Crema de tomate con albahaca.
+31,Tiramisú,55.00,"Postre de café, mascarpone y cacao."
+32,Crème Brûlée,60.00,Crema francesa con caramelo crujiente.
+33,Cheesecake de Fresa,58.00,Tarta cremosa con coulis de fresa.
+34,Flan de Caramelo,40.00,Flan clásico bañado en caramelo.
+35,Churros con Chocolate,45.00,Churros crujientes con chocolate caliente.
+36,Gyozas de Cerdo,66.00,Empanadillas japonesas a la plancha.
+37,Tempura Mixta,84.00,Mariscos y verduras en tempura ligera.
+38,Cochinita Pibil,88.00,Cerdo marinado en achiote y naranja.
+39,Chiles Rellenos,72.00,Chile poblano relleno de queso.
+40,Arroz Cantonés,64.00,Arroz salteado con huevo y verduras.
+41,Pato al Hoisin,155.00,Pato laqueado con salsa hoisin.
+42,Gulab Jamun,46.00,Dulce indio en almíbar de rosa.
+43,Satay de Pollo,74.00,Brochetas de pollo con salsa de cacahuate.
+44,Crêpes Suzette,68.00,Crepes con naranja y licor.
+45,Boef Bourguignon,145.00,Res brasada en vino y verduras.
+46,Tzatziki con Pan,44.00,Yogur griego con pepino y ajo.
+47,Anticuchos,62.00,Brochetas de corazón con ají.
+48,Arepa Rellena,50.00,Arepa con queso y carne mechada.
+49,Tom Yum Goong,90.00,Sopa tailandesa de camarón y limoncillo.
+50,Mango Sticky Rice,52.00,Arroz glutinoso con mango y coco.

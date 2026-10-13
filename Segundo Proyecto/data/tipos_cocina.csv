@@ -1,0 +1,16 @@
+tipo_cocina_id,nombre,descripcion
+1,Italiana,"Pastas, pizzas y cocina mediterranea de Italia."
+2,Japonesa,"Sushi, ramen y tecnicas minimalistas japonesas."
+3,Mexicana,"Tacos, moles y sabores picantes de Mexico."
+4,China,"Platos salteados, dim sum y cocina regional china."
+5,India,"Currys, especias y cocina del subcontinente indio."
+6,Tailandesa,"Equilibrio de dulce, acido, salado y picante."
+7,Francesa,"Alta cocina, salsas y reposteria francesa."
+8,Española,"Tapas, paellas y jamon de España."
+9,Griega,Cocina mediterranea con aceite de oliva y cordero.
+10,Peruana,"Ceviches, tiraditos y fusion nikkei."
+11,Brasileña,"Churrasco, feijoada y cocina amazonica."
+12,Coreana,"Barbacoa, kimchi y fermentados coreanos."
+13,Vietnamita,"Pho, rollos frescos y hierbas aromaticas."
+14,Mediterranea,"Dieta balanceada de mariscos, granos y verduras."
+15,Americana,"Hamburguesas, parrilla y comfort food."
