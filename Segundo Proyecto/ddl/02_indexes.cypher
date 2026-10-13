@@ -7,8 +7,8 @@ FOR (r:Restaurante) ON (r.nombre);
 CREATE INDEX idx_restaurante_rango IF NOT EXISTS
 FOR (r:Restaurante) ON (r.rango_precios);
 
-CREATE INDEX idx_restaurante_anio IF NOT EXISTS
-FOR (r:Restaurante) ON (r.anio_apertura);
+CREATE INDEX idx_restaurante_anio_apertura IF NOT EXISTS
+FOR (r:Restaurante) ON (r.año_apertura);
 
 // Chef: nacionalidad (usado en Q2)
 CREATE INDEX idx_chef_nacionalidad IF NOT EXISTS
