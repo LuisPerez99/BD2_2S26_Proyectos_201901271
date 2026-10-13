@@ -7,7 +7,9 @@
 
 Este documento reúne de forma continua el análisis de requerimientos, el modelo
 conceptual de grafos, el diseño del esquema para Neo4j, la configuración del
-motor, la implementación física y el catálogo de consultas del sistema.
+motor, la implementación física, la carga masiva de datos y la implementación y
+los **resultados** de las consultas de negocio (Q1–Q5) y análisis de redes
+(N1–N2).
 
 ---
 
@@ -102,7 +104,7 @@ Establecimientos gastronómicos de la plataforma.
 | Propiedad (enunciado) | Nombre técnico | Tipo | Obligatorio | Descripción / dominio |
 | :--- | :--- | :--- | :-: | :--- |
 | Nombre | `nombre` | String | Sí | Nombre del restaurante. |
-| Año de Apertura | `anio_apertura` | Integer | Sí | Año en que abrió (p. ej. 1990–2025). |
+| Año de Apertura | `año_apertura` | Integer | Sí | Año en que abrió (p. ej. 1990–2025). |
 | Rango de Precios | `rango_precios` | String (enum) | Sí | `Económico`, `Moderado`, `Caro`, `Premium`. |
 | Descripción | `descripcion` | String | No | Texto libre descriptivo. |
 | — (técnico) | `restaurante_id` | Integer | Sí | Identificador lógico único. |
@@ -298,7 +300,7 @@ y decisiones orientadas a las consultas de negocio.
 | :--- | :--- | :--- |
 | Etiqueta de nodo | Singular, **CamelCase** | `Usuario`, `Restaurante`, `TipoCocina`, `Chef`, `Platillo` |
 | Tipo de relación | **MAYÚSCULAS_CON_GUIONES_BAJOS** | `CALIFICÓ`, `VISITÓ`, `ES_AMIGO_DE`, `PERTENECE_A`, `OFRECE`, `PREPARA`, `TRABAJA_EN`, `LE_GUSTA` |
-| Propiedad | **snake_case**, sin acentos | `usuario_id`, `anio_apertura`, `fecha_nacimiento`, `nivel_interes` |
+| Propiedad | **snake_case**, sin acentos (la `ñ` sí se conserva) | `usuario_id`, `año_apertura`, `fecha_nacimiento`, `nivel_interes` |
 | Constraint / índice | Prefijo por tipo | `uniq_usuario_id`, `idx_restaurante_nombre` |
 
 ### 9.2. Esquema de nodos
@@ -322,7 +324,7 @@ se almacena como escalar `date('YYYY-MM-DD')`.
 | :--- | :--- | :-: | :--- | :--- |
 | `restaurante_id` | INTEGER | Sí | **Único** | Identificador lógico. |
 | `nombre` | STRING | Sí | Índice | Nombre del restaurante. |
-| `anio_apertura` | INTEGER | Sí | | Año de apertura. |
+| `año_apertura` | INTEGER | Sí | | Año de apertura. |
 | `rango_precios` | STRING (enum) | Sí | Índice | `Económico` \| `Moderado` \| `Caro` \| `Premium`. |
 | `descripcion` | STRING | No | | Texto libre. |
 
@@ -419,7 +421,7 @@ El esquema físico se implementa con los scripts `ddl/01_constraints.cypher` y
 | :--- | :--- | :--- |
 | `idx_restaurante_nombre` | `Restaurante` | `nombre` |
 | `idx_restaurante_rango` | `Restaurante` | `rango_precios` |
-| `idx_restaurante_anio` | `Restaurante` | `anio_apertura` |
+| `idx_restaurante_anio_apertura` | `Restaurante` | `año_apertura` |
 | `idx_chef_nacionalidad` | `Chef` | `nacionalidad` |
 | `idx_usuario_pais` | `Usuario` | `pais` |
 | `idx_platillo_precio` | `Platillo` | `precio` |
@@ -467,7 +469,12 @@ El esquema físico se implementa con los scripts `ddl/01_constraints.cypher` y
 
 ```
 Segundo Proyecto/
-├── data/                      # CSVs de carga, montado en /import (solo lectura)
+├── carga/
+│   ├── gen_data.py            # Generador de CSV (Python estándar)
+│   ├── 01_load_nodes.cypher   # LOAD CSV de nodos
+│   ├── 02_load_rels.cypher    # LOAD CSV de relaciones
+│   └── verificar_carga.cypher # Validación de la carga
+├── data/                      # CSVs generados, montados en /import (solo lectura)
 ├── ddl/
 │   ├── 00_reset.cypher        # Vaciar la base (desarrollo)
 │   ├── 01_constraints.cypher  # Constraints de unicidad
@@ -475,7 +482,16 @@ Segundo Proyecto/
 ├── docker/
 │   └── docker-compose.yml     # Definición del contenedor Neo4j
 ├── documentacion/
-│   └── Documentación Técnica.md
+│   ├── Documentación Técnica.md   # Documento técnico consolidado (secciones 1–16)
+│   └── Manual de Usuario.md       # Instalación, carga, consultas y resolución
+├── queries/
+│   ├── q1_recomendacion_social.cypher       # Q1: recomendación social
+│   ├── q2_chefs_alto_impacto.cypher         # Q2: chefs de alto impacto
+│   ├── q3_infravalorados.cypher             # Q3: restaurantes infravalorados
+│   ├── q4_precio_vs_consumo.cypher          # Q4: precio declarado vs. consumo
+│   ├── q5_cocina_declarada_vs_visitada.cypher # Q5: cocina declarada vs. visitada
+│   ├── n1_grados_separacion.cypher          # N1: shortestPath entre usuarios
+│   └── n2_restaurantes_conectados.cypher    # N2: restaurantes altamente conectados
 └── src/
     └── main.py                # Conexión de prueba vía neo4j-driver
 ```
@@ -618,17 +634,402 @@ ORDER BY (count(DISTINCT c) + count(DISTINCT p)) DESC;
 
 ---
 
-## 13. Conclusiones
+## 13. Carga masiva de datos
 
-1. El dominio se representa de forma natural con **5 tipos de nodo** y
-   **8 tipos de relación**, con propiedades en nodos y aristas, cubriendo las
-   **6 reglas de negocio** del enunciado.
-2. El esquema Neo4j queda implementado con **7 constraints** de unicidad y
-   **10 índices** secundarios, todos `ONLINE`, sobre Neo4j 2026.09.0 Community.
-3. Las **5 consultas obligatorias** y los **2 análisis de redes** son expresables
-   como patrones de traversal multi-nivel, lo que valida la idoneidad del enfoque
-   de grafos frente a un modelo relacional.
-4. El entorno es reproducible vía Docker Compose y la carpeta de importación
+### 13.1. Generación de los CSV
+
+El dataset se genera con `carga/gen_data.py`, un script Python que usa solo la
+biblioteca estándar y una semilla fija (`20260001`) para resultados reproducibles.
+
+| Entidad / Relación | Archivo CSV | Filas |
+| :--- | :--- | ---: |
+| Usuario | `usuarios.csv` | 500 |
+| Restaurante | `restaurantes.csv` | 200 |
+| Chef | `chefs.csv` | 100 |
+| Platillo | `platillos.csv` | 50 |
+| TipoCocina | `tipos_cocina.csv` | 15 |
+| CALIFICÓ | `califico.csv` | 2713 |
+| VISITÓ | `visito.csv` | 3492 |
+| ES_AMIGO_DE | `es_amigo_de.csv` | 5000 |
+| PERTENECE_A | `pertenece_a.csv` | 379 |
+| OFRECE | `ofrece.csv` | 2090 |
+| PREPARA | `prepara.csv` | 350 |
+| TRABAJA_EN | `trabaja_en.csv` | 277 |
+| LE_GUSTA | `le_gusta.csv` | 1261 |
+
+Totales: **865 nodos** y **15 562 relaciones**, superando los mínimos exigidos
+(500 usuarios, 200 restaurantes, 100 chefs, 50 platillos y 15 tipos de cocina).
+
+```bash
+.venv/bin/python carga/gen_data.py
+```
+
+### 13.2. Carga con `LOAD CSV` + `MERGE`
+
+Los nodos y las relaciones se cargan con `carga/01_load_nodes.cypher` y
+`carga/02_load_rels.cypher`, usando `LOAD CSV WITH HEADERS`, `MERGE` (idempotente)
+y procesamiento por lotes.
+
+> **Nota sobre `USING PERIODIC COMMIT`:** esta cláusula fue **eliminada** en Neo4j
+> 5.23+. Su equivalente moderno, usado en este proyecto, es
+> `CALL (row) { ... } IN TRANSACTIONS OF N ROWS`, que aplica el mismo
+> procesamiento por lotes.
+
+Ejemplo de carga de nodos:
+
+```cypher
+LOAD CSV WITH HEADERS FROM 'file:///usuarios.csv' AS row
+CALL (row) {
+  MERGE (u:Usuario {usuario_id: toInteger(row.usuario_id)})
+  SET u.nombre = row.nombre, u.email = row.email,
+      u.edad = toInteger(row.edad), u.pais = row.pais
+} IN TRANSACTIONS OF 1000 ROWS;
+```
+
+Ejemplo de carga de relaciones:
+
+```cypher
+LOAD CSV WITH HEADERS FROM 'file:///califico.csv' AS row
+CALL (row) {
+  MATCH (u:Usuario {usuario_id: toInteger(row.usuario_id)})
+  MATCH (r:Restaurante {restaurante_id: toInteger(row.restaurante_id)})
+  MERGE (u)-[c:CALIFICÓ]->(r)
+  SET c.puntuacion = toInteger(row.puntuacion), c.fecha = date(row.fecha)
+} IN TRANSACTIONS OF 1000 ROWS;
+```
+
+Aplicación:
+
+```bash
+docker exec -i neo4j cypher-shell -u neo4j -p admin123 < carga/01_load_nodes.cypher
+docker exec -i neo4j cypher-shell -u neo4j -p admin123 < carga/02_load_rels.cypher
+```
+
+### 13.3. Verificación de la carga
+
+Conteos verificados con `carga/verificar_carga.cypher`:
+
+| Chequeo | Resultado |
+| :--- | :--- |
+| Nodos `Usuario` / `Restaurante` / `Chef` / `Platillo` / `TipoCocina` | 500 / 200 / 100 / 50 / 15 |
+| Relaciones por tipo | CALIFICÓ 2713 · VISITÓ 3492 · ES_AMIGO_DE 5000 · PERTENECE_A 379 · OFRECE 2090 · PREPARA 350 · TRABAJA_EN 277 · LE_GUSTA 1261 |
+| Propiedades obligatorias nulas | 0 en todas las entidades |
+| Dominio `puntuacion` / `nivel_interes` fuera de rango | 0 |
+| `rango_precios` fuera del enum | 0 |
+| Restaurantes sin chef / sin platillo / sin cocina | 0 / 0 / 0 |
+| Usuarios sin amistad / sin preferencia / sin visita | 0 / 0 / 0 |
+| Duplicados `(Restaurante)-[:OFRECE]->(Platillo)` | 0 |
+| Amistades no recíprocas | 0 |
+| Indicadores globales | rating 3.93 · reserva 0.50 · consumo 360.30 |
+
+---
+
+## 14. Implementación de las consultas Cypher (Q1–Q5)
+
+Las 5 consultas obligatorias se implementan como scripts **idénticos** a los que
+se ejecutaron contra la base (`queries/q*_*.cypher`). Emplean patrones de
+traversal multi-nivel, longitud variable y agregaciones. Los resultados de esta
+sección se obtuvieron sobre el dataset cargado en §13.
+
+### Q1 — Recomendación social (amigos hasta 3 grados)
+
+**Objetivo:** recomendar restaurantes con calificaciones altas (≥ 4) dadas por
+amigos directos e indirectos (hasta 3 grados), priorizando por cantidad de
+amigos coincidentes y calificación promedio, **excluyendo** los restaurantes que
+el usuario ya visitó. Código: `queries/q1_recomendacion_social.cypher`
+(parámetro `$email`).
+
+```cypher
+MATCH (u:Usuario {email: $email})-[:ES_AMIGO_DE*1..3]-(amigo:Usuario)
+MATCH (amigo)-[c:CALIFICÓ]->(r:Restaurante)
+WHERE c.puntuacion >= 4
+  AND NOT (u)-[:VISITÓ]->(r)
+WITH r, count(DISTINCT amigo) AS amigos_coincidentes, avg(c.puntuacion) AS calificacion_prom
+RETURN r.nombre AS restaurante, amigos_coincidentes, round(calificacion_prom, 2) AS calificacion_prom
+ORDER BY amigos_coincidentes DESC, calificacion_prom DESC, r.nombre
+LIMIT 20;
+```
+
+```bash
+docker exec -i neo4j cypher-shell -u neo4j -p admin123 \
+  --param "email => 'paula.gonzalez.129@correo.com'" \
+  < queries/q1_recomendacion_social.cypher
+```
+
+**Resultado** (usuaria Paula Gonzalez, 40 amigos directos): **196 restaurantes**
+recomendados; los 8 primeros:
+
+| Restaurante | Amigos coincidentes | Calificación prom. |
+| :--- | ---: | ---: |
+| El Rincón Familiar | 19 | 4.56 |
+| Estancia de la Plaza | 18 | 4.71 |
+| Rincón Familiar | 16 | 4.48 |
+| Estancia del Puerto | 16 | 4.45 |
+| Raíces Premium | 15 | 4.57 |
+| Cantina Selecto | 15 | 4.56 |
+| Brasa Premium | 15 | 4.51 |
+| Huerto Tradicional | 15 | 4.48 |
+
+**Interpretación:** el ranking prioriza el apoyo social (más amigos que dan ≥ 4)
+y, en empate, la calificación promedio. Los restaurantes ya visitados por la
+usuaria se excluyen automáticamente (`NOT (u)-[:VISITÓ]->(r)`).
+
+### Q2 — Chefs de alto impacto
+
+**Objetivo:** identificar chefs que trabajan en restaurantes con calificación
+promedio **> 4** y cuyos platillos se ofrecen en **≥ 3 restaurantes distintos**.
+Código: `queries/q2_chefs_alto_impacto.cypher`.
+
+```cypher
+MATCH (chef:Chef)-[:TRABAJA_EN]->(r:Restaurante)<-[c:CALIFICÓ]-(:Usuario)
+WITH chef, r, avg(c.puntuacion) AS prom_r
+WITH chef, avg(prom_r) AS prom_restaurantes
+WHERE prom_restaurantes > 4
+MATCH (chef)-[:PREPARA]->(:Platillo)<-[:OFRECE]-(otro:Restaurante)
+WITH chef, prom_restaurantes, count(DISTINCT otro) AS restaurantes_platillos
+WHERE restaurantes_platillos >= 3
+RETURN chef.nombre AS chef, round(prom_restaurantes, 2) AS prom_restaurantes, restaurantes_platillos
+ORDER BY restaurantes_platillos DESC, prom_restaurantes DESC
+LIMIT 20;
+```
+
+**Resultado:** **44 chefs** de alto impacto de 100; los 8 primeros:
+
+| Chef | Prom. restaurantes | Restaurantes con sus platillos |
+| :--- | ---: | ---: |
+| Carmen Castro | 4.35 | 146 |
+| Ana Perez | 4.33 | 146 |
+| Pedro Herrera | 4.21 | 145 |
+| Daniela Gomez | 4.18 | 143 |
+| Camila Morales | 4.10 | 143 |
+| Rosa Hernandez | 4.09 | 140 |
+| Jose Gonzalez | 4.56 | 139 |
+| Adriana Sanchez | 4.04 | 139 |
+
+**Interpretación:** el promedio por restaurante (y no por calificación) evita que
+un restaurante con muchas reseñas sesgue al chef; `TRABAJA_EN` y `OFRECE` se
+conectan vía el platillo preparado (`PREPARA`), un recorrido de 2 saltos que en
+SQL exigiría 3 `JOIN`s.
+
+### Q3 — Restaurantes infravalorados
+
+**Objetivo:** restaurantes con tasa de visitas **con reserva** superior al
+promedio general de la plataforma pero con calificación promedio **inferior** al
+promedio general. Código: `queries/q3_infravalorados.cypher`.
+
+```cypher
+MATCH (:Usuario)-[v:VISITÓ]->(:Restaurante)
+WITH sum(CASE WHEN v.con_reserva THEN 1.0 ELSE 0.0 END) / count(v) AS g_reserva
+MATCH (:Usuario)-[c:CALIFICÓ]->(:Restaurante)
+WITH g_reserva, avg(c.puntuacion) AS g_rating
+MATCH (r:Restaurante)<-[v2:VISITÓ]-(:Usuario)
+WITH r, g_reserva, g_rating, avg(CASE WHEN v2.con_reserva THEN 1.0 ELSE 0.0 END) AS tasa_reserva
+MATCH (r)<-[c2:CALIFICÓ]-(:Usuario)
+WITH r, g_reserva, g_rating, tasa_reserva, avg(c2.puntuacion) AS prom_rating
+WHERE tasa_reserva > g_reserva AND prom_rating < g_rating
+RETURN r.nombre AS restaurante, r.rango_precios AS rango,
+       round(tasa_reserva, 3) AS tasa_reserva, round(prom_rating, 2) AS prom_rating,
+       round(g_reserva, 3) AS tasa_global, round(g_rating, 2) AS rating_global
+ORDER BY (tasa_reserva - g_reserva) DESC
+LIMIT 20;
+```
+
+**Resultado:** **46 restaurantes** infravalorados de 200. Medias globales:
+`tasa_global = 0.500`, `rating_global = 3.93`. Los 8 primeros:
+
+| Restaurante | Rango | Tasa reserva | Prom. rating |
+| :--- | :--- | ---: | ---: |
+| Raíces Real | Económico | 0.786 | 3.90 |
+| Mesa Familiar | Caro | 0.778 | 3.71 |
+| Oasis & Co | Premium | 0.750 | 3.88 |
+| Mesa Moderno | Económico | 0.733 | 3.89 |
+| Raíces del Centro | Moderado | 0.722 | 3.67 |
+| Mesa Premium | Caro | 0.714 | 3.83 |
+| Mesa de la Plaza | Premium | 0.692 | 3.89 |
+| Cocina Nova | Caro | 0.684 | 3.29 |
+
+**Interpretación:** son locales muy demandados (la gente reserva) pero que el
+público puntúa por debajo de la media: candidatos a mejorar experiencia o a
+detectar expectativas desalineadas.
+
+### Q4 — Rango de precio declarado vs. consumo real
+
+**Objetivo:** comparar el rango de precios declarado (mapeado a un consumo
+esperado de referencia, §12.1) contra el consumo promedio real de sus visitas;
+devolver la mayor diferencia. Código: `queries/q4_precio_vs_consumo.cypher`.
+
+```cypher
+MATCH (r:Restaurante)<-[v:VISITÓ]-(:Usuario)
+WITH r, avg(v.consumo) AS consumo_real
+WITH r, consumo_real,
+     CASE r.rango_precios
+       WHEN 'Económico' THEN 100.0 WHEN 'Moderado' THEN 250.0
+       WHEN 'Caro' THEN 500.0 WHEN 'Premium' THEN 900.0
+       ELSE 0.0 END AS consumo_esperado
+RETURN r.nombre AS restaurante, r.rango_precios AS rango,
+       round(consumo_real, 2) AS consumo_real, consumo_esperado,
+       round(consumo_real - consumo_esperado, 2) AS diferencia
+ORDER BY diferencia DESC
+LIMIT 20;
+```
+
+**Resultado:** los 8 con mayor diferencia positiva:
+
+| Restaurante | Rango | Consumo real | Consumo esperado | Diferencia |
+| :--- | :--- | ---: | ---: | ---: |
+| Oasis & Co | Premium | 1114.79 | 900.00 | +214.79 |
+| Raíces Premium | Premium | 1109.96 | 900.00 | +209.96 |
+| Sabor Tradicional | Premium | 1088.10 | 900.00 | +188.10 |
+| Arcada de la Plaza | Premium | 1045.55 | 900.00 | +145.55 |
+| Estancia del Valle | Premium | 1038.69 | 900.00 | +138.69 |
+| Sabor Premium | Caro | 624.90 | 500.00 | +124.90 |
+| Casa del Valle | Premium | 1016.13 | 900.00 | +116.13 |
+| Bistró del Puerto | Moderado | 365.12 | 250.00 | +115.12 |
+
+**Interpretación:** el `CASE` sobre el enum mapea categoría → consumo esperado sin
+tabla auxiliar. Restaurantes `Premium` superan ampliamente su referencia; `Sabor
+Premium` (Caro) consume como `Premium`, señal de que su categoría declarada
+subestima el ticket real.
+
+### Q5 — Cocina favorita declarada vs. realmente visitada
+
+**Objetivo:** contrastar el tipo de cocina con mayor `nivel_interes`
+(`LE_GUSTA`) contra el tipo más visitado (`VISITÓ → PERTENECE_A`) y marcar la
+discrepancia. Código: `queries/q5_cocina_declarada_vs_visitada.cypher`.
+
+```cypher
+MATCH (u:Usuario)-[g:LE_GUSTA]->(td:TipoCocina)
+WITH u, td, g.nivel_interes AS nivel
+ORDER BY nivel DESC, td.tipo_cocina_id ASC
+WITH u, collect(td)[0] AS cocina_declarada, collect(nivel)[0] AS nivel_declarado
+MATCH (u)-[:VISITÓ]->(r:Restaurante)-[:PERTENECE_A]->(tv:TipoCocina)
+WITH u, cocina_declarada, nivel_declarado, tv, count(*) AS visitas
+ORDER BY visitas DESC, tv.tipo_cocina_id ASC
+WITH u, cocina_declarada, nivel_declarado,
+     collect(tv)[0] AS cocina_real, collect(visitas)[0] AS visitas_cocina
+RETURN u.nombre AS usuario, cocina_declarada.nombre AS cocina_declarada, nivel_declarado,
+       cocina_real.nombre AS cocina_real, visitas_cocina,
+       CASE WHEN cocina_declarada = cocina_real THEN false ELSE true END AS discrepancia
+ORDER BY discrepancia DESC, visitas_cocina DESC
+LIMIT 20;
+```
+
+**Resultado:** de **500 usuarios**, **461** presentan discrepancia y 39
+coinciden. Ejemplos (los 6 con más visitas a su cocina real distinta):
+
+| Usuario | Cocina declarada | Nivel | Cocina real | Visitas reales | Discrepancia |
+| :--- | :--- | ---: | :--- | ---: | :-: |
+| Monica Morales | Griega | 4 | Vietnamita | 6 | sí |
+| Alejandro Lopez | China | 5 | Brasileña | 5 | sí |
+| Sofia Romero | Mexicana | 5 | Mediterranea | 5 | sí |
+| Felipe Torres | Francesa | 1 | Tailandesa | 5 | sí |
+| Alberto Gomez | China | 4 | Tailandesa | 5 | sí |
+| Pedro Medina | Japonesa | 5 | Coreana | 5 | sí |
+
+**Interpretación:** `collect(...)[0]` tras `ORDER BY` selecciona el valor máximo
+desempatando por id (determinista). La alta tasa de discrepancia (92 %) sugiere
+que las preferencias declaradas no se reflejan en el comportamiento de visita:
+información útil para el motor de recomendación (segmentar perfiles reales).
+
+---
+
+## 15. Análisis de redes (N1–N2)
+
+### N1 — Ruta más corta entre usuarios (grados de separación)
+
+**Objetivo:** calcular los grados de separación entre dos usuarios con
+`shortestPath` sobre `ES_AMIGO_DE`. Código:
+`queries/n1_grados_separacion.cypher` (parámetros `$a`, `$b`).
+
+```cypher
+MATCH (a:Usuario {email: $a}), (b:Usuario {email: $b}),
+      p = shortestPath((a)-[:ES_AMIGO_DE*..20]-(b))
+RETURN a.nombre AS desde, b.nombre AS hasta,
+       length(p) AS grados_de_separacion,
+       [n IN nodes(p) | n.nombre] AS camino;
+```
+
+```bash
+docker exec -i neo4j cypher-shell -u neo4j -p admin123 \
+  --param "a => 'marta.herrera.31@correo.com'" --param "b => 'ana.rojas.73@correo.com'" \
+  < queries/n1_grados_separacion.cypher
+```
+
+**Resultado (ejemplos):**
+
+| Desde | Hasta | Grados | Camino |
+| :--- | :--- | ---: | :--- |
+| Marta Herrera | Ana Rojas | 5 | Marta Herrera → Oscar Herrera → Ivan Gutierrez → Manuel Morales → Alejandro Gutierrez → Ana Rojas |
+| Paula Gonzalez | Isabel Lopez | 4 | Paula Gonzalez → Maria Morales → Ricardo Romero → Valeria Ortiz → Isabel Lopez |
+| Paula Gonzalez | Diego Jimenez | 1 | Paula Gonzalez → Diego Jimenez |
+
+**Métricas globales de la red social** (todas las parejas):
+
+| Métrica | Valor |
+| :--- | ---: |
+| Separación mínima | 1 |
+| Diámetro (máxima separación) | 5 |
+| Separación promedio | 2.94 |
+| Desviación estándar | 0.64 |
+
+**Interpretación:** la red de 500 usuarios es un **mundo pequeño** (seis grados
+de separación clásico se cumple con margen: diámetro 5, promedio < 3). Esto
+valida la regla RN6: con 3 grados se alcanza prácticamente toda la red social.
+
+### N2 — Restaurantes altamente conectados
+
+**Objetivo:** ranking de restaurantes por número de chefs (`TRABAJA_EN`) y
+platillos destacados (`OFRECE`). Código:
+`queries/n2_restaurantes_conectados.cypher`.
+
+```cypher
+MATCH (r:Restaurante)
+OPTIONAL MATCH (r)<-[:TRABAJA_EN]-(c:Chef)
+OPTIONAL MATCH (r)-[:OFRECE]->(p:Platillo)
+WITH r, count(DISTINCT c) AS num_chefs, count(DISTINCT p) AS num_platillos
+RETURN r.nombre AS restaurante, num_chefs, num_platillos,
+       (num_chefs + num_platillos) AS conectividad
+ORDER BY conectividad DESC, r.nombre
+LIMIT 20;
+```
+
+**Resultado:**
+
+| Restaurante | Chefs | Platillos | Conectividad |
+| :--- | ---: | ---: | ---: |
+| Sabor Real | 4 | 14 | 18 |
+| Delicias del Valle | 2 | 15 | 17 |
+| Huerto & Co | 2 | 15 | 17 |
+| Huerto Selecto | 2 | 15 | 17 |
+| Mirador Real | 3 | 14 | 17 |
+| Bistró de la Plaza | 2 | 14 | 16 |
+| Casa Familiar | 1 | 15 | 16 |
+| Casa de Autor | 1 | 15 | 16 |
+
+**Interpretación:** `Sabor Real` concentra **4 chefs** y 14 platillos: es el nodo
+más central del grafo gastronómico, con más talento y oferta culinaria.
+`count(DISTINCT ...)` evita la multiplicación de filas de los dos `OPTIONAL
+MATCH`.
+
+---
+
+## 16. Conclusiones
+
+1. El dominio se representa con **5 tipos de nodo** y **8 tipos de relación**, con
+   propiedades en nodos y aristas, cubriendo las **6 reglas de negocio**.
+2. El esquema Neo4j se implementa con **7 constraints** de unicidad y **10 índices**
+   secundarios, todos `ONLINE`, sobre Neo4j 2026.09.0 Community.
+3. La carga masiva inserta **865 nodos** y **15 562 relaciones** con `LOAD CSV` y
+   `MERGE`, superando los mínimos exigidos y con **cero** violaciones de integridad.
+4. Las **5 consultas obligatorias** y los **2 análisis de redes** se implementan y
+   ejecutan sobre los datos: **196 recomendaciones** para la usuaria de prueba,
+   **44 chefs** de alto impacto, **46 restaurantes** infravalorados, clasificación
+   precio vs. consumo, y **461/500** usuarios con discrepancia cocina declarada vs.
+   visitada; la red social tiene diámetro **5** y separación promedio **2.94**.
+5. Los patrones de traversal multi-nivel (`ES_AMIGO_DE*1..3`, `shortestPath`,
+   `PREPARA → OFRECE`) expresan de forma directa consultas que en SQL exigirían
+   múltiples `JOIN`s recursivos, validando la idoneidad del enfoque de grafos.
+6. El entorno es reproducible vía Docker Compose y la carpeta de importación
    (`/import`, solo lectura) habilita la carga masiva con `LOAD CSV`.
 
 ---
