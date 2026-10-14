@@ -209,6 +209,22 @@ con sus **propiedades**. El grafo es **heterogéneo** (nodos de distinto tipo) y
 **mixto** en dirección (relaciones entre entidades distintas y autorrelación
 `ES_AMIGO_DE`).
 
+### 5.1.1. Diagrama detallado por relación
+
+Los siguientes diagramas muestran, de forma individual, cada relación del modelo
+de grafos junto a sus propiedades:
+
+| Relación | Diagrama |
+| :--- | :--- |
+| `CALIFICÓ` (Usuario → Restaurante) | ![Calificó](imagenes/calificó.png) |
+| `VISITÓ` (Usuario → Restaurante) | ![Visito](imagenes/visito.png) |
+| `ES_AMIGO_DE` (Usuario → Usuario) | ![Es Amigo De](imagenes/es_amigo_de.png) |
+| `PERTENECE_A` (Restaurante → TipoCocina) | ![Pertenece A](imagenes/pertenece_a.png) |
+| `OFRECE` (Restaurante → Platillo) | ![Ofrece](imagenes/ofrece.png) |
+| `PREPARA` (Chef → Platillo) | ![Prepara](imagenes/prepara.png) |
+| `TRABAJA_EN` (Chef → Restaurante) | ![Trabaja En](imagenes/trabaja_en.png) |
+| `LE_GUSTA` (Usuario → TipoCocina) | ![Le Gusta](imagenes/le_gusta.png) |
+
 ### 5.2. Lectura del modelo (patrones de traversal relevantes)
 
 | Patrón de traversal | Relaciones implicadas | Consulta de negocio soportada |
