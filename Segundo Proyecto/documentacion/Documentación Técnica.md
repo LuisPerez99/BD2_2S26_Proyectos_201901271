@@ -1,18 +1,5 @@
 # Documentación Técnica — Sistema de Recomendación de Restaurantes con Neo4j
 
-> **Proyecto:** Sistema de Recomendación de Restaurantes con Neo4j
-> **Materia:** Bases de Datos 2
-> **Motor:** Neo4j 2026.09.0 (Community Edition)
-> **Entregable:** Documentación Técnica
-
-Este documento reúne de forma continua el análisis de requerimientos, el modelo
-conceptual de grafos, el diseño del esquema para Neo4j, la configuración del
-motor, la implementación física, la carga masiva de datos y la implementación y
-los **resultados** de las consultas de negocio (Q1–Q5) y análisis de redes
-(N1–N2).
-
----
-
 ## 1. Propósito y alcance
 
 El objetivo del proyecto es diseñar e implementar en **Neo4j** una base de datos
@@ -184,46 +171,49 @@ del enunciado: **mayúsculas con guiones bajos**.
 
 ### 5.1. Diagrama conceptual
 
-```mermaid
-flowchart LR
-    U([Usuario]):::n
-    R([Restaurante]):::n
-    T([TipoCocina]):::n
-    C([Chef]):::n
-    P([Platillo]):::n
-
-    U -- "CALIFICÓ {puntuacion, fecha, comentario}" --> R
-    U -- "VISITÓ {fecha, consumo, con_reserva}" --> R
-    U -- "ES_AMIGO_DE {fecha_amistad}" --> U
-    U -- "LE_GUSTA {nivel_interes}" --> T
-    R -- "PERTENECE_A" --> T
-    R -- "OFRECE {precio, disponible}" --> P
-    C -- "TRABAJA_EN {fecha_inicio, puesto}" --> R
-    C -- "PREPARA {estilo, especialidad}" --> P
-
-    classDef n fill:#e8f0fe,stroke:#1a73e8,stroke-width:2px,color:#111;
-```
+![modelo_conceptual](imagenes/modelo_conceptual.svg)
 
 Leyenda: cada nodo representa una **entidad**; cada arco una **relación dirigida**
 con sus **propiedades**. El grafo es **heterogéneo** (nodos de distinto tipo) y
 **mixto** en dirección (relaciones entre entidades distintas y autorrelación
 `ES_AMIGO_DE`).
 
-### 5.1.1. Diagrama detallado por relación
+### 5.1.1. Diagrama de grafos
 
 Los siguientes diagramas muestran, de forma individual, cada relación del modelo
 de grafos junto a sus propiedades:
 
-| Relación | Diagrama |
-| :--- | :--- |
-| `CALIFICÓ` (Usuario → Restaurante) | ![Calificó](imagenes/calificó.png) |
-| `VISITÓ` (Usuario → Restaurante) | ![Visito](imagenes/visito.png) |
-| `ES_AMIGO_DE` (Usuario → Usuario) | ![Es Amigo De](imagenes/es_amigo_de.png) |
-| `PERTENECE_A` (Restaurante → TipoCocina) | ![Pertenece A](imagenes/pertenece_a.png) |
-| `OFRECE` (Restaurante → Platillo) | ![Ofrece](imagenes/ofrece.png) |
-| `PREPARA` (Chef → Platillo) | ![Prepara](imagenes/prepara.png) |
-| `TRABAJA_EN` (Chef → Restaurante) | ![Trabaja En](imagenes/trabaja_en.png) |
-| `LE_GUSTA` (Usuario → TipoCocina) | ![Le Gusta](imagenes/le_gusta.png) |
+- `CALIFICÓ` (Usuario → Restaurante)
+
+![Calificó](imagenes/calificó.png)
+
+- `VISITÓ` (Usuario → Restaurante)
+
+![Visito](imagenes/visito.png)
+
+- `ES_AMIGO_DE` (Usuario → Usuario)
+
+![Es Amigo De](imagenes/es_amigo_de.png)
+
+- `PERTENECE_A` (Restaurante → TipoCocina)
+
+![Pertenece A](imagenes/pertenece_a.png) |
+
+- `OFRECE` (Restaurante → Platillo)
+
+![Ofrece](imagenes/ofrece.png) |
+
+- `PREPARA` (Chef → Platillo)
+
+![Prepara](imagenes/prepara.png)
+
+- `TRABAJA_EN` (Chef → Restaurante)
+
+![Trabaja En](imagenes/trabaja_en.png)
+
+- `LE_GUSTA` (Usuario → TipoCocina)
+
+![Le Gusta](imagenes/le_gusta.png)
 
 ### 5.2. Lectura del modelo (patrones de traversal relevantes)
 
@@ -481,38 +471,7 @@ El esquema físico se implementa con los scripts `ddl/01_constraints.cypher` y
 | HTTP / Browser | `http://localhost:7474` |
 | Plugins | APOC habilitado |
 
-### 11.2. Estructura del proyecto
-
-```
-Segundo Proyecto/
-├── carga/
-│   ├── gen_data.py            # Generador de CSV (Python estándar)
-│   ├── 01_load_nodes.cypher   # LOAD CSV de nodos
-│   ├── 02_load_rels.cypher    # LOAD CSV de relaciones
-│   └── verificar_carga.cypher # Validación de la carga
-├── data/                      # CSVs generados, montados en /import (solo lectura)
-├── ddl/
-│   ├── 00_reset.cypher        # Vaciar la base (desarrollo)
-│   ├── 01_constraints.cypher  # Constraints de unicidad
-│   └── 02_indexes.cypher      # Índices secundarios
-├── docker/
-│   └── docker-compose.yml     # Definición del contenedor Neo4j
-├── documentacion/
-│   ├── Documentación Técnica.md   # Documento técnico consolidado (secciones 1–16)
-│   └── Manual de Usuario.md       # Instalación, carga, consultas y resolución
-├── queries/
-│   ├── q1_recomendacion_social.cypher       # Q1: recomendación social
-│   ├── q2_chefs_alto_impacto.cypher         # Q2: chefs de alto impacto
-│   ├── q3_infravalorados.cypher             # Q3: restaurantes infravalorados
-│   ├── q4_precio_vs_consumo.cypher          # Q4: precio declarado vs. consumo
-│   ├── q5_cocina_declarada_vs_visitada.cypher # Q5: cocina declarada vs. visitada
-│   ├── n1_grados_separacion.cypher          # N1: shortestPath entre usuarios
-│   └── n2_restaurantes_conectados.cypher    # N2: restaurantes altamente conectados
-└── src/
-    └── main.py                # Conexión de prueba vía neo4j-driver
-```
-
-### 11.3. Configuración de Neo4j (`docker/docker-compose.yml`)
+### 11.2. Configuración de Neo4j (`docker/docker-compose.yml`)
 
 | Ajuste | Valor | Motivo |
 | :--- | :--- | :--- |
@@ -530,7 +489,7 @@ Segundo Proyecto/
 > (`/var/lib/neo4j`) y `/data`; al usar `/import` como ruta personalizada se evita
 > que el host pierda la propiedad de los archivos CSV.
 
-### 11.4. Puesta en marcha
+### 11.3. Puesta en marcha
 
 ```bash
 cd docker
@@ -538,14 +497,14 @@ docker compose up -d
 docker exec neo4j cypher-shell -u neo4j -p admin123 "RETURN 1 AS ok;"
 ```
 
-### 11.5. Aplicación del esquema
+### 11.4. Aplicación del esquema
 
 ```bash
 docker exec -i neo4j cypher-shell -u neo4j -p admin123 < ddl/01_constraints.cypher
 docker exec -i neo4j cypher-shell -u neo4j -p admin123 < ddl/02_indexes.cypher
 ```
 
-### 11.6. Reproducción desde cero
+### 11.5. Reproducción desde cero
 
 ```bash
 cd docker && docker compose up -d
